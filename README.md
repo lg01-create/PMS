@@ -1,64 +1,82 @@
-Personal Management System (PMS)
+# Personal Management System (PMS)
 
-A Windows-friendly, standalone personal management app built with Python + Flask + SQLite.
-It keeps your data local by default and includes tasks, bookmarks, calendar (FullCalendar), notes, contacts, and a unified email view (Gmail + Outlook).
+A **Windows-friendly**, local-first personal management app built with **Python, Flask, and SQLite**.  
+PMS keeps your data on your machine and brings together **Tasks, Bookmarks, Calendar (FullCalendar), Notes, Contacts, and Email (Gmail & Outlook)** in one place.
 
-✨ Features
+---
 
-Dashboard
+## Table of Contents
+- [Features](#features)
+- [Architecture](#architecture)
+- [Prerequisites](#prerequisites)
+- [Initial Setup (Windows)](#initial-setup-windows)
+- [Running the App](#running-the-app)
+- [Email Setup](#email-setup)
+- [Configuration Reference](#configuration-reference)
+- [Project Structure](#project-structure)
+- [Admin: Create a User](#admin-create-a-user)
+- [Troubleshooting](#troubleshooting)
+- [Security Notes](#security-notes)
+- [License](#license)
+- [Roadmap](#roadmap)
 
-Quick view of tasks, events, and Bookmarks dashboard grouped by categories.
+---
 
-Tasks
+## Features
+- **Dashboard**
+  - Quick summary of tasks & upcoming events.
+  - **Bookmarks dashboard** grouped by: Daily use, Important, Personal, Company, Reference, Others (expand/collapse, scroll).
+- **Tasks**
+  - Description, notes, links/files, **subtasks**, categories (work/personal/other), **tags**.
+  - Start date defaults to **today**; due date with a date picker.
+  - Task title links to a **details** view with **edit**.
+- **Bookmarks**
+  - Clean **title-only** chips on the dashboard; each opens in a new tab.
+  - **Manage** page with search, category filter, edit/delete.
+- **Calendar**
+  - FullCalendar view of events (create/view/navigate).
+- **Email**
+  - Connect **multiple Gmail and Microsoft 365/Outlook** accounts.
+  - Shows last **N** days (configurable) with **deep links** to open in provider.
+- **Notes & Contacts**
+  - Lightweight CRUD with timestamps.
+- **Reminders (optional)**
+  - Background scheduler checks for due tasks and upcoming events and logs reminders.
 
-Title, description, start/due dates (picker), priority, status.
+---
 
-Notes, links/files, subtasks, categories (work / personal / other), and tags.
+## Architecture
+- **Backend:** Flask + Flask-Login + SQLAlchemy (SQLite)
+- **Frontend:** Jinja templates + FullCalendar + minimal JS/CSS
+- **Storage:** Local SQLite DB (`data/app.db`) + per-provider token folders
+- **Scheduler:** APScheduler (optional; can be disabled)
 
-Task title links to a details page with edit.
+---
 
-Bookmarks
+## Prerequisites
+- **Python:** 3.11+ (3.12 works too)
+- **Windows 10/11** (primary target). Linux/macOS work as well with minor path changes.
+- (Optional, for HTTPS) **mkcert** or any dev TLS cert generator.
 
-Category-based dashboard (Daily use, Important, Personal, Company, Reference, Others).
+---
 
-Minimal title-only chips; sections can expand/collapse; each section scrolls (H & V).
+## Initial Setup (Windows)
 
-Manage page with search, category filter, edit/delete.
+Open **PowerShell** in the project folder (e.g., `C:\Projects\PMS`) and run:
 
-Calendar
+```powershell
+# 1) Create and activate a virtual environment
+python -m venv .venv
+.\.venv\Scripts\activate
 
-FullCalendar integration; create and view events.
+# 2) Install dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
 
-Email
+# 3) Copy default environment file and edit if needed
+copy .env.example .env
+# If you plan to test Gmail OAuth over HTTP during development:
+#   set OAUTHLIB_INSECURE_TRANSPORT=1 in .env
 
-Multiple Gmail and Outlook (Microsoft 365) accounts.
-
-Shows last N days (configurable), with deep links to open mails in the provider.
-
-Notes & Contacts
-
-Lightweight CRUD with timestamps.
-
-Reminders (optional)
-
-Background scheduler prints reminders for tasks coming due and upcoming events.
-
-🧰 Tech Stack (minimal, local-first)
-
-Python 3.11+ (Windows)
-
-Flask, Jinja2, Flask-Login
-
-SQLAlchemy + Flask-SQLAlchemy + SQLite
-
-APScheduler (optional reminders)
-
-FullCalendar (front-end calendar)
-
-OAuth clients:
-
-Gmail: google-api-python-client, google-auth-oauthlib
-
-Outlook: msal (Microsoft Graph)
-
-No cloud backend required. All data persists in data/app.db (SQLite).
+# 4) One-time DB migration (adds missing columns like Bookmark.category)
+python tools\ensure_bookmark_category.py
