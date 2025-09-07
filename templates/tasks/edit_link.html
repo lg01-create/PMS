@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Edit Link · {{ task.title }}{% endblock %}
+{% block page_title %}Edit Link{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <form method="post" class="form-grid" style="max-width:680px">
+      <label>Title<input name="title" class="input" value="{{ link.title }}" required></label>
+      <label>Type
+        <select name="kind" class="input">
+          <option value="web" {% if link.kind=='web' %}selected{% endif %}>Website</option>
+          <option value="file" {% if link.kind=='file' %}selected{% endif %}>Local file/folder</option>
+          <option value="app" {% if link.kind=='app' %}selected{% endif %}>App/Command</option>
+        </select>
+      </label>
+      <label>URL / Path
+        <input name="url" class="input" value="{{ link.url }}" required>
+      </label>
+      <div class="form-actions">
+        <button class="btn btn-primary">Save</button>
+        <a class="btn" href="{{ url_for('tasks.edit_task', tid=task.id) }}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

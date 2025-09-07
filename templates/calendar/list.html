@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Calendar{% endblock %}
+{% block page_title %}Events{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <div><a class="btn" href="{{ url_for('calendar.full_view') }}">Full view</a></div>
+  <a class="btn btn-primary" href="{{ url_for('calendar.new_event') }}">New</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <table class="table">
+      <thead><tr><th>Title</th><th>Start</th><th>End</th><th>Location</th><th class="text-right"></th></tr></thead>
+      <tbody>
+      {% for e in events %}
+        <tr>
+          <td>{{ e.title }}</td><td>{{ e.start_at or '' }}</td><td>{{ e.end_at or '' }}</td><td>{{ e.location or '' }}</td>
+          <td class="text-right">
+            <a class="btn btn-sm" href="{{ url_for('calendar.edit_event', eid=e.id) }}">Edit</a>
+            <form method="post" action="{{ url_for('calendar.delete_event', eid=e.id) }}" style="display:inline" onsubmit="return confirm('Delete?')">
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5">No events</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

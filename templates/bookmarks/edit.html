@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit' if item else 'New' }} Bookmark{% endblock %}
+{% block page_title %}{{ 'Edit' if item else 'New' }} Bookmark{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <form method="post" class="form-grid" style="max-width:680px">
+      <label>Title<input name="title" class="input" value="{{ item.title if item else '' }}" required></label>
+      <label>Type
+        <select name="kind" class="input">
+          <option value="web" {% if item and item.kind=='web' %}selected{% endif %}>Website</option>
+          <option value="file" {% if item and item.kind=='file' %}selected{% endif %}>Local file/folder</option>
+          <option value="app" {% if item and item.kind=='app' %}selected{% endif %}>App/Command</option>
+        </select>
+      </label>
+      <label>URL / Path
+        <input name="url" class="input" placeholder="https://example.com or C:\\Path\\To\\File.txt" value="{{ item.url if item else '' }}" required>
+      </label>
+      <label>Notes<textarea name="notes" class="input" rows="4">{{ item.notes if item else '' }}</textarea></label>
+      <div class="badge">Tip: Local paths convert to <code>file:///C:/...</code>.</div>
+      <div class="form-actions">
+        <button class="btn btn-primary">Save</button>
+        <a class="btn" href="{{ url_for('bookmarks.list_bookmarks') }}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

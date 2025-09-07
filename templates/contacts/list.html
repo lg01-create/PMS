@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Contacts{% endblock %}
+{% block page_title %}Contacts{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <form class="toolbar-row" method="get">
+    <input name="q" value="{{ q }}" class="input" placeholder="Search name, email, phone...">
+    <button class="btn btn-outline">Search</button>
+  </form>
+  <a class="btn btn-primary" href="{{ url_for('contacts.new_contact') }}">New</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <table class="table">
+      <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th class="text-right"></th></tr></thead>
+      <tbody>
+      {% for c in contacts %}
+        <tr>
+          <td>{{ c.name }}</td><td>{{ c.email }}</td><td>{{ c.phone }}</td>
+          <td class="text-right">
+            <a class="btn btn-sm" href="{{ url_for('contacts.edit_contact', cid=c.id) }}">Edit</a>
+            <form method="post" action="{{ url_for('contacts.delete_contact', cid=c.id) }}" style="display:inline" onsubmit="return confirm('Delete?')">
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4">No contacts</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

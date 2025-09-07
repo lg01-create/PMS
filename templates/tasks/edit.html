@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit' if task else 'New' }} Task{% endblock %}
+{% block page_title %}{{ 'Edit' if task else 'New' }} Task{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <form method="post" class="form-grid">
+      <label>Title<input name="title" class="input" value="{{ task.title if task else '' }}" required></label>
+
+      <label>Description
+        <textarea name="description" class="input" rows="6" placeholder="Details...">{{ task.description if task else '' }}</textarea>
+      </label>
+
+      <label>Category
+        <select name="category" class="input">
+          {% set cat = (task.category if task else 'other') %}
+          <option value="work" {{ 'selected' if cat=='work' else '' }}>Work</option>
+          <option value="personal" {{ 'selected' if cat=='personal' else '' }}>Personal</option>
+          <option value="other" {{ 'selected' if cat=='other' else '' }}>Other</option>
+        </select>
+      </label>
+
+      <label>Tags (comma separated)
+        {% if task %}
+          {% set tagstr = (task.tags | map(attribute='name') | join(', ')) %}
+        {% else %}
+          {% set tagstr = '' %}
+        {% endif %}
+        <input name="tags" class="input" value="{{ tagstr }}">
+      </label>
+
+      <label>Status
+        <select name="status" class="input">
+          {% set st = (task.status if task else 'todo') %}
+          <option value="todo" {{ 'selected' if st=='todo' else '' }}>To Do</option>
+          <option value="doing" {{ 'selected' if st=='doing' else '' }}>Doing</option>
+          <option value="done" {{ 'selected' if st=='done' else '' }}>Done</option>
+        </select>
+      </label>
+
+      <label>Priority (0..3)
+        <input name="priority" type="number" min="0" max="3" class="input" value="{{ task.priority if task else 0 }}">
+      </label>
+
+      <label>Start
+        <div style="display:flex; gap:.5rem; align-items:center">
+          <input id="start_at" name="start_at" type="datetime-local" class="input" value="{{ (task.start_at or preset_start)|replace(' ', 'T') if (task or preset_start) else '' }}">
+          <button type="button" class="btn" onclick="document.getElementById('start_at').showPicker?.()">📅</button>
+        </div>
+      </label>
+
+      <label>Due
+        <div style="display:flex; gap:.5rem; align-items:center">
+          <input id="due_at" name="due_at" type="datetime-local" class="input" value="{{ (task.due_at)|replace(' ', 'T') if task and task.due_at else '' }}">
+          <button type="button" class="btn" onclick="document.getElementById('due_at').showPicker?.()">📅</button>
+        </div>
+      </label>
+
+      <div class="form-actions">
+        <button class="btn btn-primary">Save</button>
+        <a class="btn" href="{{ url_for('tasks.list_tasks') }}">Back</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% if task %}
+<div class="grid-3 mt-3">
+  <div class="card">
+    <div class="card-head"><h3>Subtasks</h3></div>
+    <div class="card-body">
+      <form method="post" action="{{ url_for('tasks.add_subtask', tid=task.id) }}" class="toolbar-row" style="margin-bottom:.75rem">
+        <input name="title" class="input" placeholder="New subtask title" required>
+        <button class="btn btn-outline">Add</button>
+      </form>
+      <ul class="list">
+        {% for s in task.subtasks %}
+        <li class="list-item">
+          <form method="post" action="{{ url_for('tasks.toggle_subtask', tid=task.id, sid=s.id) }}" style="display:inline">
+            <button class="btn btn-sm">{{ '✅' if s.status=='done' else '⬜' }}</button>
+          </form>
+          <span style="flex:1; margin-left:.5rem; {{ 'text-decoration:line-through; opacity:.7' if s.status=='done' else '' }}">{{ s.title }}</span>
+          <form method="post" action="{{ url_for('tasks.del_subtask', tid=task.id, sid=s.id) }}" style="display:inline">
+            <button class="btn btn-sm btn-danger">Delete</button>
+          </form>
+        </li>
+        {% else %}
+        <li class="list-item">No subtasks</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Notes</h3></div>
+    <div class="card-body">
+      <form method="post" action="{{ url_for('tasks.add_note', tid=task.id) }}">
+        <textarea name="body" class="input" rows="3" placeholder="Add a quick note..."></textarea>
+        <div class="form-actions"><button class="btn btn-outline">Add Note</button></div>
+      </form>
+      <ul class="list mt-2">
+        {% for n in task.notes|sort(attribute='created_at', reverse=true) %}
+        <li class="list-item">
+          <span style="flex:1">{{ n.body }}</span>
+          <form method="post" action="{{ url_for('tasks.del_note', tid=task.id, nid=n.id) }}">
+            <button class="btn btn-sm btn-danger">Delete</button>
+          </form>
+        </li>
+        {% else %}
+        <li class="list-item">No notes</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Links & Files</h3></div>
+    <div class="card-body hscroll">
+      <form method="post" action="{{ url_for('tasks.add_link', tid=task.id) }}" class="form-grid">
+        <label>Title<input name="title" class="input" placeholder="e.g., Design doc"></label>
+        <label>Type
+          <select name="kind" class="input">
+            <option value="web">Website</option>
+            <option value="file">Local file/folder</option>
+            <option value="app">App/Command</option>
+          </select>
+        </label>
+        <label>URL / Path
+          <input name="url" class="input" placeholder="https://... or C:\\Path\\To\\File.txt" required>
+        </label>
+        <div class="form-actions"><button class="btn btn-outline">Add Link</button></div>
+      </form>
+
+      <table class="table mt-2 nowrap">
+        <thead><tr><th>Title</th><th>Type</th><th>Target</th><th class="text-right"></th></tr></thead>
+        <tbody>
+          {% for l in task.links %}
+          <tr>
+            <td>{{ l.title }}</td>
+            <td>{{ l.kind }}</td>
+            <td>
+              {% if l.kind == 'file' %}
+                <a href="{{ l.url }}">{{ l.url }}</a>
+              {% else %}
+                <a href="{{ l.url }}" target="_blank" rel="noreferrer">{{ l.url }}</a>
+              {% endif %}
+            </td>
+            <td class="text-right">
+              <a class="btn btn-sm" href="{{ url_for('tasks.edit_link', tid=task.id, lid=l.id) }}">Edit</a>
+              <form method="post" action="{{ url_for('tasks.del_link', tid=task.id, lid=l.id) }}" style="display:inline">
+                <button class="btn btn-sm btn-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4">No links</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

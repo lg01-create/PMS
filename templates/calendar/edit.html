@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit' if event else 'New' }} Event{% endblock %}
+{% block page_title %}{{ 'Edit' if event else 'New' }} Event{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <form method="post" class="form-grid">
+      <label>Title<input name="title" class="input" value="{{ event.title if event else '' }}" required></label>
+      <label>Start (ISO format)<input name="start_at" class="input" value="{{ event.start_at if event and event.start_at else '' }}"></label>
+      <label>End (ISO format)<input name="end_at" class="input" value="{{ event.end_at if event and event.end_at else '' }}"></label>
+      <label>Location<input name="location" class="input" value="{{ event.location if event else '' }}"></label>
+      <label>Description<textarea name="description" class="input" rows="6">{{ event.description if event else '' }}</textarea></label>
+      <div class="form-actions">
+        <button class="btn btn-primary">Save</button>
+        <a class="btn" href="{{ url_for('calendar.list_events') }}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+flask>=3.0
+flask-login>=0.6
+sqlalchemy>=2.0
+flask-sqlalchemy>=3.1
+passlib[bcrypt]>=1.7
+apscheduler>=3.10
+python-dotenv>=1.0
+google-api-python-client>=2.137.0
+google-auth-oauthlib>=1.2.1
+google-auth>=2.35.0
+msal>=1.29.0
+requests>=2.32.3

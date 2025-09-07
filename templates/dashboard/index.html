@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+<div class="grid-3">
+  <div class="card">
+    <div class="card-head"><h3>Open Tasks</h3></div>
+    <div class="card-body">
+      <ul class="list">
+        {% for t in open_tasks %}
+        <li class="list-item">
+          <span><a href="{{ url_for('tasks.view_task', tid=t.id) }}">{{ t.title }}</a></span>
+          {% if t.due_at %}<span class="badge">{{ t.due_at }}</span>{% endif %}
+        </li>
+        {% else %}
+        <li class="list-item">No tasks</li>
+        {% endfor %}
+      </ul>
+      <a href="{{ url_for('tasks.new_task') }}" class="btn btn-primary mt-3">Add Task</a>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Recent Notes</h3></div>
+    <div class="card-body">
+      <ul class="list">
+        {% for n in recent_notes %}
+        <li class="list-item">{{ n.title }}</li>
+        {% else %}
+        <li class="list-item">No notes</li>
+        {% endfor %}
+      </ul>
+      <a href="{{ url_for('notes.new_note') }}" class="btn btn-primary mt-3">Add Note</a>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Upcoming Events</h3></div>
+    <div class="card-body">
+      <ul class="list">
+        {% for e in upcoming_events %}
+        <li class="list-item">
+          <span>{{ e.title }}</span>
+          {% if e.start_at %}<span class="badge">{{ e.start_at }}</span>{% endif %}
+        </li>
+        {% else %}
+        <li class="list-item">No events</li>
+        {% endfor %}
+      </ul>
+      <a href="{{ url_for('calendar.new_event') }}" class="btn btn-primary mt-3">Add Event</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

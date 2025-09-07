@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Envs
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local data
+data/app.db
+data/*.db
+data/*.sqlite*
+data/files/
+instance/
+
+# OAuth secrets & tokens
+.env
+.env.*
+data/gmail/client_secret.json
+data/gmail/tokens/
+data/outlook/app_config.json
+data/outlook/tokens/
+
+# Certs
+certs/
+*.pem
+*.key
+*.pfx
+
+# Caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

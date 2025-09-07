@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Calendar{% endblock %}
+{% block page_title %}Calendar{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <div id="calendar"></div>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='vendor/fullcalendar/index.global.min.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='vendor/fullcalendar/fullcalendar.min.css') }}"/>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (!window.FullCalendar) {
+    PMS.toast('FullCalendar assets are placeholders. Replace with the real files.','warning');
+    return;
+  }
+  const calendarEl = document.getElementById('calendar');
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth',
+    height: 'auto',
+    headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek' },
+    events: '{{ url_for('calendar.feed_events_json') }}',
+  });
+  calendar.render();
+});
+</script>
+{% endblock %}

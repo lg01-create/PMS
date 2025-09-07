@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Bookmarks{% endblock %}
+{% block page_title %}Bookmarks Dashboard{% endblock %}
+{% block page_actions %}
+	<a class="btn btn-primary" href="{{ url_for('bookmarks.manage') }}">Manage / All links</a>
+	<a class="btn btn-primary" href="{{ url_for('bookmarks.new_bookmark') }}">Add bookmark</a>
+{% endblock %}
+
+
+
+{% block content %}
+<style>
+  .book-dash { display:flex; flex-direction:column; gap:1rem; }
+  .book-cat { border:1px solid #243; border-radius:14px; background:#0f1430; }
+  .book-cat-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:.6rem .8rem; border-bottom:1px solid #1b2340;
+  }
+  .book-cat-title { margin:0; font-size:1.05rem; }
+  .book-cat-actions { display:flex; gap:.5rem; align-items:center; }
+
+  .book-cat-body.is-collapsed { display:none; }
+
+  /* Scrollable grid that can show ~10 items before scroll */
+  .book-grid {
+    max-height: 420px;
+    min-height: 220px;
+    padding: .7rem;
+    overflow: auto;                 /* vertical + horizontal scroll when needed */
+    display: grid;
+    gap: .6rem;
+    grid-auto-rows: minmax(40px, auto);
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+
+  /* Title-only chip (clickable) */
+  .book-chip {
+    display:block;
+    padding:.65rem .8rem;
+    border:1px solid #1b2a4a;
+    border-radius:10px;
+    background:#111734;
+    color:#cfe2ff;
+    text-decoration:none;
+    font-weight:600;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    transition:background .15s ease, border-color .15s ease, transform .04s ease;
+  }
+  .book-chip:hover { background:#16214a; border-color:#2a4090; text-decoration:none; }
+  .book-chip:active { transform:translateY(1px); }
+</style>
+
+<div class="book-dash">
+  {% for key, label in [
+    ('daily','Daily use'),
+    ('important','Important links'),
+    ('personal','Personal'),
+    ('company','Company links'),
+    ('reference','Reference links'),
+    ('other','Others')
+  ] %}
+    {% set open_default = key in ['daily','important'] %}
+    <section class="book-cat">
+      <header class="book-cat-header">
+        <h3 class="book-cat-title">{{ label }}</h3>
+        <div class="book-cat-actions">
+          <span class="badge">{{ counts.get(key,0) }} links</span>
+          <button
+            type="button"
+            class="btn btn-ghost btn-toggle"
+            data-target="cat-{{ key }}"
+            aria-controls="cat-{{ key }}"
+            aria-expanded="{{ 'true' if open_default else 'false' }}">
+            {{ 'Hide' if open_default else 'Show' }}
+          </button>
+        </div>
+      </header>
+
+      <div id="cat-{{ key }}" class="book-cat-body {{ '' if open_default else 'is-collapsed' }}">
+        <div class="book-grid">
+          {% if by_cat[key]|length == 0 %}
+            <span class="book-chip" style="opacity:.7; pointer-events:none;">No bookmarks yet</span>
+          {% else %}
+            {% for b in by_cat[key] %}
+              <a class="book-chip"
+                 href="{{ b.url }}"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 title="{{ b.title }} — {{ b.url }}">{{ b.title }}</a>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+    </section>
+  {% endfor %}
+</div>
+
+<!-- Toggle behavior -->
+<script src="{{ url_for('static', filename='js/bookmarks.js') }}"></script>
+{% endblock %}

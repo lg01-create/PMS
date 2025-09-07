@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}Email Accounts{% endblock %}
+{% block page_title %}Email Accounts{% endblock %}
+{% block content %}
+<div class="grid-3">
+  <div class="card">
+    <div class="card-head"><h3>Gmail</h3></div>
+    <div class="card-body">
+      {% if secrets_missing %}
+        <div class="badge">Client secrets missing</div>
+        <p>Create OAuth 2.0 Client ID (Web) in Google Cloud and download <code>client_secret.json</code>.</p>
+        <ol>
+          <li>Authorized redirect URI: <code>http{{ 's' if request.scheme=='https' else '' }}://{{ request.host }}/email/oauth2/callback</code></li>
+          <li>Place file at: <code>{{ secrets_path }}</code></li>
+        </ol>
+      {% else %}
+        <p>Ready to connect Gmail.</p>
+      {% endif %}
+      <a class="btn btn-primary" href="{{ url_for('email.g_connect') }}">Connect Gmail account</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Outlook / Office 365</h3></div>
+    <div class="card-body">
+      {% if o_cfg_missing %}
+        <div class="badge">App config missing</div>
+        <p>Create <code>app_config.json</code> with: <code>client_id</code>, <code>client_secret</code>, <code>tenant</code>.</p>
+        <ol>
+          <li>Azure Portal → App registrations → New registration (Web)</li>
+          <li>Redirect URI: <code>http{{ 's' if request.scheme=='https' else '' }}://{{ request.host }}/email/outlook/callback</code></li>
+          <li>API permissions (Delegated): Microsoft Graph → <code>Mail.Read</code> (+ <code>offline_access</code>)</li>
+          <li>Place file at: <code>{{ o_cfg_path }}</code></li>
+        </ol>
+      {% else %}
+        <p>Ready to connect Outlook.</p>
+      {% endif %}
+      <a class="btn btn-primary" href="{{ url_for('email.o_connect') }}">Connect Outlook account</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Lookback</h3></div>
+    <div class="card-body">
+      <p>Showing last <strong>{{ current_app.config.get('EMAIL_LOOKBACK_DAYS', 5) }}</strong> day(s) of mail for both Gmail and Outlook.</p>
+      <p>Change via <code>.env</code>: <code>EMAIL_LOOKBACK_DAYS=5</code></p>
+    </div>
+  </div>
+</div>
+
+<div class="card mt-3">
+  <div class="card-head"><h3>Connected Accounts</h3></div>
+  <div class="card-body">
+    <table class="table">
+      <thead><tr><th>Provider</th><th>Email</th><th>Token</th><th class="text-right"></th></tr></thead>
+      <tbody>
+      {% for a in g_accounts %}
+        <tr>
+          <td><span class="badge">Gmail</span></td>
+          <td>{{ a.email }}</td>
+          <td><code>{{ a.token_path }}</code></td>
+          <td class="text-right">
+            <form method="post" action="{{ url_for('email.g_delete_account', aid=a.id) }}" onsubmit="return confirm('Remove this Gmail account?')">
+              <button class="btn btn-sm btn-danger">Remove</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      {% for a in o_accounts %}
+        <tr>
+          <td><span class="badge">Outlook</span></td>
+          <td>{{ a.email }}</td>
+          <td><code>{{ a.token_path }}</code></td>
+          <td class="text-right">
+            <form method="post" action="{{ url_for('email.o_delete_account', aid=a.id) }}" onsubmit="return confirm('Remove this Outlook account?')">
+              <button class="btn btn-sm btn-danger">Remove</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      {% if g_accounts|length == 0 and o_accounts|length == 0 %}
+        <tr><td colspan="4">No accounts connected</td></tr>
+      {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

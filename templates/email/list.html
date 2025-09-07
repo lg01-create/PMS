@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Email{% endblock %}
+{% block page_title %}Email (last {{ lookback_days }} days){% endblock %}
+{% block page_actions %}
+  <a class="btn" href="{{ url_for('email.accounts') }}">Manage accounts</a>
+{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    {% if (g_accounts|length + o_accounts|length) == 0 %}
+      <p>No email accounts connected yet.</p>
+      <a class="btn btn-primary" href="{{ url_for('email.accounts') }}">Connect accounts</a>
+    {% else %}
+      <table class="table">
+        <thead><tr><th>Provider</th><th>Account</th><th>From</th><th>Subject</th><th>Date</th><th>Preview</th><th class="text-right">Open</th></tr></thead>
+        <tbody>
+          {% for m in items %}
+          <tr>
+            <td><span class="badge">{{ m.provider }}</span></td>
+            <td><span class="badge">{{ m.account }}</span></td>
+            <td>{{ m.from }}</td>
+            <td>
+              {% if m.open_url %}
+              <a href="{{ m.open_url }}" target="_blank" rel="noreferrer">{{ m.subject }}</a>
+              {% else %}
+              {{ m.subject }}
+              {% endif %}
+            </td>
+            <td>{{ m.date }}</td>
+            <td class="nowrap">{{ m.snippet }}</td>
+            <td class="text-right">
+              {% if m.open_url %}
+              <a class="btn btn-sm btn-outline" href="{{ m.open_url }}" target="_blank" rel="noreferrer">Open</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="7">No recent mail in the last {{ lookback_days }} days</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

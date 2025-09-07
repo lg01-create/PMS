@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+{% block page_title %}Login{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <form method="post" class="form-grid" style="max-width:420px;margin:auto">
+      <label>Email<input name="email" type="email" class="input" required></label>
+      <label>Password<input name="password" type="password" class="input" required></label>
+      <div class="form-actions">
+        <button class="btn btn-primary">Login</button>
+        <a class="btn" href="{{ url_for('auth.register') }}">Register</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

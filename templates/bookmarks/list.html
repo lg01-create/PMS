@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Bookmarks{% endblock %}
+{% block page_title %}Bookmarks{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <form class="toolbar-row" method="get">
+    <input name="q" value="{{ q }}" class="input" placeholder="Search...">
+    <button class="btn btn-outline">Search</button>
+  </form>
+  <a class="btn btn-primary" href="{{ url_for('bookmarks.new_bookmark') }}">New</a>
+</div>
+<div class="card">
+  <div class="card-body">
+    <table class="table">
+      <thead><tr><th>Title</th><th>Type</th><th>Target</th><th class="text-right"></th></tr></thead>
+      <tbody>
+      {% for b in items %}
+        <tr>
+          <td>{{ b.title }}</td>
+          <td>{{ b.kind }}</td>
+          <td>
+            {% if b.kind == 'web' %}
+              <a href="{{ b.url }}" target="_blank" rel="noreferrer">{{ b.url }}</a>
+            {% elif b.kind == 'file' %}
+              <a href="{{ b.url }}">{{ b.url }}</a>
+              <div class="badge">Tip: Browser may block file:// links. Copy & paste into Explorer if needed.</div>
+            {% else %}
+              <code>{{ b.url }}</code>
+            {% endif %}
+          </td>
+          <td class="text-right">
+            <a class="btn btn-sm" href="{{ url_for('bookmarks.edit_bookmark', bid=b.id) }}">Edit</a>
+            <form method="post" action="{{ url_for('bookmarks.delete_bookmark', bid=b.id) }}" style="display:inline" onsubmit="return confirm('Delete?')">
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4">No bookmarks yet</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

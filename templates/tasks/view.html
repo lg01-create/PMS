@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Task · {{ task.title }}{% endblock %}
+{% block page_title %}Task Details{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <div class="toolbar" style="margin-bottom:1rem">
+      <h2 style="margin:0">{{ task.title }}</h2>
+      <div>
+        <a class="btn" href="{{ url_for('tasks.list_tasks') }}">Back</a>
+        <a class="btn btn-primary" href="{{ url_for('tasks.edit_task', tid=task.id) }}">Edit</a>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div>
+        <div class="badge">Status</div>
+        <div style="margin:.25rem 0 1rem">{{ task.status }}</div>
+        <div class="badge">Category</div>
+        <div style="margin:.25rem 0 1rem">{{ task.category }}</div>
+        <div class="badge">Priority</div>
+        <div style="margin:.25rem 0 1rem">{{ task.priority }}</div>
+      </div>
+      <div>
+        <div class="badge">Start</div>
+        <div style="margin:.25rem 0 1rem">{{ task.start_at or '—' }}</div>
+        <div class="badge">Due</div>
+        <div style="margin:.25rem 0 1rem">{{ task.due_at or '—' }}</div>
+      </div>
+      <div>
+        <div class="badge">Tags</div>
+        <div style="margin:.25rem 0 1rem">
+          {% for tag in task.tags %}<span class="badge">#{{ tag.name }}</span>{% else %}—{% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-3">
+      <div class="badge">Description</div>
+      <div style="white-space:pre-wrap; margin-top:.5rem">{{ task.description or '—' }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid-3 mt-3">
+  <div class="card">
+    <div class="card-head"><h3>Subtasks</h3></div>
+    <div class="card-body">
+      <ul class="list">
+        {% for s in task.subtasks %}
+        <li class="list-item">
+          <span>{{ '✅' if s.status=='done' else '⬜' }}</span>
+          <span style="flex:1; margin-left:.5rem; {{ 'text-decoration:line-through; opacity:.7' if s.status=='done' else '' }}">{{ s.title }}</span>
+        </li>
+        {% else %}
+        <li class="list-item">No subtasks</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Notes</h3></div>
+    <div class="card-body">
+      <ul class="list">
+        {% for n in task.notes|sort(attribute='created_at', reverse=true) %}
+        <li class="list-item"><span>{{ n.body }}</span></li>
+        {% else %}
+        <li class="list-item">No notes</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Links & Files</h3></div>
+    <div class="card-body hscroll">
+      <table class="table nowrap">
+        <thead><tr><th>Title</th><th>Type</th><th>Target</th></tr></thead>
+        <tbody>
+          {% for l in task.links %}
+          <tr>
+            <td>{{ l.title }}</td>
+            <td>{{ l.kind }}</td>
+            <td>
+              {% if l.kind == 'file' %}
+                <a href="{{ l.url }}">{{ l.url }}</a>
+              {% else %}
+                <a href="{{ l.url }}" target="_blank" rel="noreferrer">{{ l.url }}</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3">No links</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

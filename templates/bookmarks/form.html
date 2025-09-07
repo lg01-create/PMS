@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if bookmark else 'New' }} Bookmark{% endblock %}
+{% block page_title %}{{ 'Edit' if bookmark else 'New' }} Bookmark{% endblock %}
+
+{% block content %}
+<form method="post" class="bm-form">
+  <div class="bm-card">
+    <div class="bm-card__header">
+      <div class="bm-card__title">
+        <span class="bm-dot"></span>
+        {{ 'Edit bookmark' if bookmark else 'Create a new bookmark' }}
+      </div>
+      <div class="bm-actions">
+        <a class="btn" href="{{ url_for('bookmarks.dashboard') }}">Cancel</a>
+        <button class="btn btn-primary" type="submit">Save</button>
+      </div>
+    </div>
+
+    <div class="bm-grid">
+      <!-- Main fields -->
+      <div class="bm-main">
+        <div class="bm-field">
+          <label class="bm-label">Title</label>
+          <input class="bm-input" name="title" placeholder="e.g., Team Jira Board" required
+                 value="{{ bookmark.title if bookmark else '' }}">
+        </div>
+
+        <div class="bm-field">
+          <label class="bm-label">URL</label>
+          <input class="bm-input" name="url" id="bm-url" placeholder="https://…  or  file:///C:/…" required
+                 value="{{ bookmark.url if bookmark else '' }}">
+          <div class="bm-help">Supports web (https://), local files (file:///C:/…), or app links.</div>
+        </div>
+
+        <div class="bm-row">
+          <div class="bm-field">
+            <label class="bm-label">Kind</label>
+            {% set k = bookmark.kind if bookmark else 'web' %}
+            <select name="kind" class="bm-select">
+              <option value="web"  {{ 'selected' if k=='web' }}>Web</option>
+              <option value="file" {{ 'selected' if k=='file' }}>File</option>
+              <option value="app"  {{ 'selected' if k=='app' }}>App</option>
+            </select>
+          </div>
+
+          <div class="bm-field">
+            <label class="bm-label">Category</label>
+            {% set c = bookmark.category if bookmark else 'other' %}
+            <select name="category" class="bm-select" required>
+              <option value="daily"     {{ 'selected' if c=='daily' }}>Daily use</option>
+              <option value="important" {{ 'selected' if c=='important' }}>Important links</option>
+              <option value="personal"  {{ 'selected' if c=='personal' }}>Personal</option>
+              <option value="company"   {{ 'selected' if c=='company' }}>Company links</option>
+              <option value="reference" {{ 'selected' if c=='reference' }}>Reference links</option>
+              <option value="other"     {{ 'selected' if c=='other' }}>Others</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="bm-field">
+          <label class="bm-label">Notes</label>
+          <textarea class="bm-textarea" name="notes" rows="5"
+                    placeholder="Optional context…">{{ bookmark.notes if bookmark else '' }}</textarea>
+        </div>
+      </div>
+
+      <!-- Live preview -->
+      <aside class="bm-aside">
+        <div class="bm-preview">
+          <div class="bm-preview__row">
+            <div class="bm-favicon" id="bm-favicon" aria-hidden="true">🔗</div>
+            <div>
+              <div class="bm-preview__title" id="bm-title">
+                {{ bookmark.title if bookmark else 'Preview title' }}
+              </div>
+              <div class="bm-preview__host" id="bm-host">—</div>
+            </div>
+          </div>
+          <a id="bm-test" class="btn btn-sm btn-outline" href="#" target="_blank" rel="noreferrer">Open</a>
+          <div class="bm-preview__hint">We’ll try to show a favicon and hostname as you type.</div>
+        </div>
+
+        <ul class="bm-tips">
+          <li><kbd>Ctrl</kbd> + <kbd>S</kbd> to save</li>
+          <li>Use <code>file:///C:/path/to/app.exe</code> for local files/apps</li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+</form>
+
+<style>
+/* Container card */
+.bm-card{
+  border:1px solid #1b2340; background:#0d132b; border-radius:16px;
+  box-shadow:0 6px 24px rgba(4,10,40,.35);
+}
+.bm-card__header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 18px; border-bottom:1px solid #1b2340;
+}
+.bm-card__title{ display:flex; align-items:center; gap:10px; font-weight:700; font-size:1.05rem; }
+.bm-dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#6aa9ff,#8ed0ff); display:inline-block;}
+.bm-actions{ display:flex; gap:.5rem; }
+
+/* Layout */
+.bm-grid{ display:grid; grid-template-columns: 1.25fr .75fr; gap:22px; padding:18px; }
+@media (max-width: 900px){ .bm-grid{ grid-template-columns: 1fr; } }
+
+.bm-main{ display:flex; flex-direction:column; gap:14px; }
+.bm-row{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+@media (max-width: 700px){ .bm-row{ grid-template-columns: 1fr; } }
+
+/* Fields */
+.bm-field{ display:flex; flex-direction:column; gap:6px; }
+.bm-label{ font-size:.95rem; color:#cbd9ff; }
+.bm-input, .bm-select, .bm-textarea{
+  background:#0f1736; border:1px solid #243055; border-radius:10px; color:#e8efff;
+  padding:10px 12px; outline:none; width:100%;
+}
+.bm-input:focus, .bm-select:focus, .bm-textarea:focus{ border-color:#5a8bff; box-shadow:0 0 0 3px rgba(88,140,255,.15); }
+.bm-help{ font-size:.85rem; color:#8ea4d9; }
+
+/* Aside / preview */
+.bm-aside{ display:flex; flex-direction:column; gap:14px; }
+.bm-preview{
+  border:1px solid #223054; background:#0f183c; border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:12px;
+}
+.bm-preview__row{ display:flex; align-items:center; gap:12px; }
+.bm-favicon{ width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:6px; background:#1a2750; font-size:14px; }
+.bm-preview__title{ font-weight:600; color:#e4ecff; }
+.bm-preview__host{ color:#9db2e6; font-size:.9rem; }
+.bm-preview__hint{ color:#7f95cf; font-size:.8rem; }
+.bm-tips{ list-style:disc; margin:0 0 0 18px; color:#97a9da; font-size:.9rem; }
+.bm-tips kbd{ background:#111b3b; border:1px solid #243055; padding:2px 6px; border-radius:6px; }
+</style>
+
+<script>
+(function(){
+  const $ = (sel)=>document.querySelector(sel);
+  const urlInput = $('#bm-url');
+  const titleInput = document.querySelector('input[name="title"]');
+  const testLink = $('#bm-test');
+  const hostEl = $('#bm-host');
+  const favEl = $('#bm-favicon');
+  const titleEl = $('#bm-title');
+
+  function parseHost(u){
+    try{
+      if(!u) return '';
+      if(u.startsWith('file://')) return 'Local file';
+      const url = new URL(u);
+      return url.host || '';
+    }catch(e){ return ''; }
+  }
+  function updatePreview(){
+    const u = urlInput.value.trim();
+    const host = parseHost(u);
+    hostEl.textContent = host || '—';
+    titleEl.textContent = (titleInput.value || '').trim() || 'Preview title';
+    testLink.href = u || '#';
+    testLink.classList.toggle('disabled', !u);
+
+    // Try favicon for http(s)
+    if(host && !u.startsWith('file://')){
+      // Use a generic icon endpoint; if it fails, we keep the emoji
+      favEl.innerHTML = '<img alt="" style="width:100%;height:100%;object-fit:cover;border-radius:6px;" '+
+                        'src="https://icons.duckduckgo.com/ip3/'+host+'.ico" '+
+                        'onerror="this.parentNode.textContent=\'🔗\'">';
+    }else{
+      favEl.textContent = '🔗';
+    }
+  }
+  function submitOnCtrlS(e){
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's'){
+      e.preventDefault();
+      e.stopPropagation();
+      // Find the nearest form and submit
+      const form = e.target.closest('form') || document.querySelector('form');
+      form && form.submit();
+    }
+  }
+  urlInput && urlInput.addEventListener('input', updatePreview);
+  titleInput && titleInput.addEventListener('input', updatePreview);
+  document.addEventListener('keydown', submitOnCtrlS);
+  updatePreview();
+})();
+</script>
+{% endblock %}

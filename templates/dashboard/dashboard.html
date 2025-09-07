@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Bookmarks{% endblock %}
+{% block page_title %}Bookmarks Dashboard{% endblock %}
+
+{% block content %}
+<div class="book-dash">
+
+  {# Auto-open Daily use + Important links; others collapsed #}
+  {% for key, label in categories %}
+    {% set open_default = (key in ["daily","important"]) %}
+    <section class="book-cat">
+      <header class="book-cat-header">
+        <h3 class="book-cat-title">{{ label }}</h3>
+        <div class="book-cat-actions">
+          <span class="badge">{{ counts.get(key, 0) }} links</span>
+          <button class="btn btn-ghost btn-toggle" data-target="#cat-{{ key }}" aria-expanded="{{ 'true' if open_default else 'false' }}">
+            {{ 'Hide' if open_default else 'Show' }}
+          </button>
+        </div>
+      </header>
+
+      <div id="cat-{{ key }}" class="book-cat-body {{ '' if open_default else 'is-collapsed' }}">
+        <div class="book-grid">
+          {% if by_cat[key]|length == 0 %}
+            <div class="book-empty">No bookmarks yet.</div>
+          {% else %}
+            {# show all; container scrolls both directions, sized to show ~10 items #}
+            {% for b in by_cat[key] %}
+              <div class="book-tile">
+                <div class="book-tile-title">
+                  <a href="{{ b.url }}" target="_blank" rel="noreferrer">{{ b.title }}</a>
+                </div>
+                <div class="book-tile-meta">
+                  <span class="badge">{{ b.kind }}</span>
+                  {% if b.notes %}<span class="muted" title="{{ b.notes }}">{{ b.notes[:60] }}{% if b.notes|length > 60 %}…{% endif %}</span>{% endif %}
+                </div>
+                <div class="book-tile-url" title="{{ b.url }}">{{ b.url }}</div>
+                {# Quick actions (optional): edit/delete if you already have these routes #}
+                <div class="book-tile-actions">
+                  <a class="btn btn-sm btn-outline" href="{{ url_for('bookmarks.edit', id=b.id) }}">Edit</a>
+                  <form method="post" action="{{ url_for('bookmarks.delete', id=b.id) }}" onsubmit="return confirm('Delete bookmark?')" style="display:inline-block">
+                    <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+                  </form>
+                </div>
+              </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+    </section>
+  {% endfor %}
+</div>
+{% endblock %}

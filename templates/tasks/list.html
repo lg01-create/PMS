@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Tasks{% endblock %}
+{% block page_title %}Tasks{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <form class="toolbar-row" method="get">
+    <select name="status" class="input" onchange="this.form.submit()">
+      <option value="">All statuses</option>
+      <option value="todo" {% if status=='todo' %}selected{% endif %}>To Do</option>
+      <option value="doing" {% if status=='doing' %}selected{% endif %}>Doing</option>
+      <option value="done" {% if status=='done' %}selected{% endif %}>Done</option>
+    </select>
+    <select name="category" class="input" onchange="this.form.submit()">
+      <option value="">All categories</option>
+      <option value="work" {% if category=='work' %}selected{% endif %}>Work</option>
+      <option value="personal" {% if category=='personal' %}selected{% endif %}>Personal</option>
+      <option value="other" {% if category=='other' %}selected{% endif %}>Other</option>
+    </select>
+    <select name="tag" class="input" onchange="this.form.submit()">
+      <option value="">All tags</option>
+      {% for t in all_tags %}
+        <option value="{{ t.name }}" {% if tag==t.name %}selected{% endif %}>#{{ t.name }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-outline">Filter</button>
+  </form>
+  <a class="btn btn-primary" href="{{ url_for('tasks.new_task') }}">New</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <table class="table">
+      <thead><tr><th>Title</th><th>Category</th><th>Tags</th><th>Start</th><th>Due</th><th>Status</th><th class="text-right"></th></tr></thead>
+      <tbody>
+      {% for t in tasks %}
+        <tr>
+          <td><a href="{{ url_for('tasks.view_task', tid=t.id) }}">{{ t.title }}</a></td>
+          <td>{{ t.category }}</td>
+          <td>{% for tag in t.tags %}<span class="badge">#{{ tag.name }}</span>{% else %}<span class="muted">—</span>{% endfor %}</td>
+          <td>{{ t.start_at or '' }}</td>
+          <td>{{ t.due_at or '' }}</td>
+          <td>{{ t.status }}</td>
+          <td class="text-right">
+            <a class="btn btn-sm" href="{{ url_for('tasks.edit_task', tid=t.id) }}">Edit</a>
+            <form method="post" action="{{ url_for('tasks.delete_task', tid=t.id) }}" style="display:inline" onsubmit="return confirm('Delete?')">
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7">No tasks</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

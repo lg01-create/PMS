@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}All Bookmarks{% endblock %}
+{% block page_title %}All Bookmarks{% endblock %}
+{% block page_actions %}
+  <a class="btn" href="{{ url_for('bookmarks.dashboard') }}">Back to dashboard</a>
+  <a class="btn btn-primary" href="{{ url_for('bookmarks.new_bookmark') }}">Add bookmark</a>
+{% endblock %}
+
+{% block content %}
+<style>
+  .bm-manage { display:flex; flex-direction:column; gap:12px; }
+  .bm-filters {
+    display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    background:#0f1736; border:1px solid #243055; border-radius:12px; padding:10px;
+  }
+  .bm-filters .form-control, .bm-filters .form-select { min-width:220px; }
+  .table-bookmarks { width:100%; border-collapse:separate; border-spacing:0; }
+  .table-bookmarks th, .table-bookmarks td { padding:10px 12px; border-bottom:1px solid #1b2340; vertical-align:middle; }
+  .table-bookmarks th { color:#cfe2ff; font-weight:600; text-align:left; }
+  .t-title a { color:#cfe2ff; text-decoration:none; font-weight:600; }
+  .t-title a:hover { text-decoration:underline; }
+  .badge-cat { padding:.2rem .5rem; border:1px solid #2a3b70; border-radius:999px; background:#111b3a; color:#aecdff; font-size:.8rem; }
+  .t-url, .t-notes { max-width: 420px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#9db2e6; }
+  .t-actions { display:flex; gap:.4rem; justify-content:flex-end; }
+</style>
+
+<div class="bm-manage">
+  <form class="bm-filters" method="get" action="{{ url_for('bookmarks.manage') }}">
+    <input class="form-control" type="text" name="q" placeholder="Search title / URL / notes…" value="{{ q }}">
+    <select class="form-select" name="cat">
+      <option value="all" {{ 'selected' if cat=='all' }}>All categories</option>
+      {% for key, label in categories %}
+        <option value="{{ key }}" {{ 'selected' if cat==key }}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-primary" type="submit">Search</button>
+    {% if q or (cat and cat!='all') %}
+      <a class="btn" href="{{ url_for('bookmarks.manage') }}">Reset</a>
+    {% endif %}
+  </form>
+
+  <div class="card">
+    <div class="card-body" style="padding:0;">
+      <table class="table-bookmarks">
+        <thead>
+          <tr>
+            <th style="width:36%;">Title</th>
+            <th style="width:16%;">Category</th>
+            <th style="width:10%;">Kind</th>
+            <th style="width:22%;">URL</th>
+            <th style="width:16%;" class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in items %}
+          <tr>
+            <td class="t-title">
+              <a href="{{ b.url }}" target="_blank" rel="noopener noreferrer">{{ b.title }}</a>
+              {% if b.notes %}<div class="t-notes" title="{{ b.notes }}">{{ b.notes }}</div>{% endif %}
+            </td>
+            <td><span class="badge-cat">{{ b.category|capitalize }}</span></td>
+            <td>{{ b.kind }}</td>
+            <td class="t-url" title="{{ b.url }}">{{ b.url }}</td>
+            <td class="t-actions">
+              <a class="btn btn-sm btn-outline" href="{{ url_for('bookmarks.edit_bookmark', bid=b.id) }}">Edit</a>
+              <form method="post" action="{{ url_for('bookmarks.delete_bookmark', bid=b.id) }}" onsubmit="return confirm('Delete this bookmark?')" style="display:inline-block">
+                <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" style="padding:16px;">No bookmarks found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

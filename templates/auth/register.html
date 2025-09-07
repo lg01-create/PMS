@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Register{% endblock %}
+{% block page_title %}Register{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <form method="post" class="form-grid" style="max-width:420px;margin:auto">
+      <label>Name<input name="name" class="input"></label>
+      <label>Email<input name="email" type="email" class="input" required></label>
+      <label>Password<input name="password" type="password" class="input" required></label>
+      <div class="form-actions">
+        <button class="btn btn-primary">Create account</button>
+        <a class="btn" href="{{ url_for('auth.login') }}">Back to login</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
